@@ -88,10 +88,41 @@ const Index = () => {
     },
   ];
 
+  const playerNames = [
+    'DragonKnight', 'ShadowBlade', 'FireMage', 'IceWizard', 'ThunderStrike',
+    'NightHunter', 'BloodRaven', 'StormBreaker', 'DarkPhoenix', 'LightningFist',
+    'MysticSage', 'WarriorKing', 'FrostQueen', 'BlazeRunner', 'VoidWalker',
+    'CrimsonBlade', 'SilverArrow', 'GoldenLion', 'IronFist', 'SteelHeart'
+  ];
+
+  const playerAvatars = ['⚔️', '🛡️', '🏹', '🔮', '⚡', '🌙', '🔥', '❄️', '💀', '👑', '🐉', '🦅', '🐺', '🦁', '🐯'];
+
+  const generateRandomPlayers = (count: number) => {
+    const players = [];
+    const usedNames = new Set();
+    
+    for (let i = 0; i < count; i++) {
+      let name;
+      do {
+        name = playerNames[Math.floor(Math.random() * playerNames.length)];
+      } while (usedNames.has(name));
+      usedNames.add(name);
+      
+      players.push({
+        name,
+        avatar: playerAvatars[Math.floor(Math.random() * playerAvatars.length)],
+        level: Math.floor(Math.random() * 50) + 1,
+        isReady: Math.random() > 0.3
+      });
+    }
+    return players;
+  };
+
   const [lobbyTimer, setLobbyTimer] = useState(30);
   const [isSearching, setIsSearching] = useState(false);
   const [selectedMode, setSelectedMode] = useState<'solo' | 'duo' | 'squad'>('solo');
   const [selectedMap, setSelectedMap] = useState(1);
+  const [foundPlayers, setFoundPlayers] = useState<Array<{name: string; avatar: string; level: number; isReady: boolean}>>([]);
   const [settings, setSettings] = useState({
     soundVolume: 80,
     musicVolume: 60,
@@ -107,6 +138,19 @@ const Index = () => {
       return () => clearTimeout(timer);
     }
   }, [isSearching, lobbyTimer]);
+
+  useEffect(() => {
+    if (isSearching) {
+      const playerCount = selectedMode === 'solo' ? 99 : selectedMode === 'duo' ? 49 : 24;
+      const interval = setInterval(() => {
+        const currentCount = Math.min(Math.floor((30 - lobbyTimer) * (playerCount / 30)), playerCount);
+        setFoundPlayers(generateRandomPlayers(Math.min(currentCount, 12)));
+      }, 2000);
+      return () => clearInterval(interval);
+    } else {
+      setFoundPlayers([]);
+    }
+  }, [isSearching, lobbyTimer, selectedMode]);
 
   const rarityColors = {
     legendary: 'from-yellow-500 to-orange-500',
@@ -538,6 +582,7 @@ const Index = () => {
                 onClick={() => {
                   setIsSearching(true);
                   setLobbyTimer(30);
+                  setFoundPlayers([]);
                 }}
               >
                 <Icon name="Search" className="mr-2" size={20} />
@@ -545,36 +590,64 @@ const Index = () => {
               </Button>
             </div>
           ) : (
-            <div className="text-center space-y-6">
-              <div className="text-8xl mb-4 animate-pulse-glow">⏱️</div>
-              <h3 className="text-3xl font-bold">Поиск игры...</h3>
-              <div className="text-5xl font-black text-primary">{lobbyTimer}с</div>
-              <Progress value={((30 - lobbyTimer) / 30) * 100} className="h-4 max-w-md mx-auto" />
-              <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                <span>Игроков найдено: {Math.min(lobbyTimer * 3, 98)}/100</span>
+            <div className="space-y-6">
+              <div className="text-center">
+                <div className="text-6xl mb-4 animate-pulse-glow">⏱️</div>
+                <h3 className="text-3xl font-bold">Поиск игры...</h3>
+                <div className="text-5xl font-black text-primary mt-2">{lobbyTimer}с</div>
+                <Progress value={((30 - lobbyTimer) / 30) * 100} className="h-4 max-w-md mx-auto mt-4" />
+                <div className="flex items-center justify-center gap-2 text-muted-foreground mt-3">
+                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                  <span>Игроков найдено: {foundPlayers.length}/{selectedMode === 'solo' ? '100' : selectedMode === 'duo' ? '50' : '25'}</span>
+                </div>
+                <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground mt-2">
+                  <span className="flex items-center gap-1">
+                    <Icon name="Users" size={16} />
+                    {selectedMode === 'solo' ? 'Соло' : selectedMode === 'duo' ? 'Дуо' : 'Отряд'}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Icon name="Map" size={16} />
+                    {maps.find(m => m.id === selectedMap)?.icon} {maps.find(m => m.id === selectedMap)?.name}
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground mb-4">
-                <span className="flex items-center gap-1">
-                  <Icon name="Users" size={16} />
-                  {selectedMode === 'solo' ? 'Соло' : selectedMode === 'duo' ? 'Дуо' : 'Отряд'}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Icon name="Map" size={16} />
-                  {maps.find(m => m.id === selectedMap)?.icon} {maps.find(m => m.id === selectedMap)?.name}
-                </span>
+
+              {foundPlayers.length > 0 && (
+                <div className="max-w-2xl mx-auto">
+                  <h4 className="text-lg font-bold mb-3 text-center">Найденные игроки</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-64 overflow-y-auto p-2">
+                    {foundPlayers.map((player, index) => (
+                      <Card key={index} className="p-3 border border-primary/30 animate-fade-in">
+                        <div className="flex items-center gap-2">
+                          <div className="text-2xl">{player.avatar}</div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-sm truncate">{player.name}</div>
+                            <div className="text-xs text-muted-foreground">Lvl {player.level}</div>
+                          </div>
+                          {player.isReady && (
+                            <div className="w-2 h-2 bg-green-500 rounded-full" />
+                          )}
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="text-center">
+                <Button 
+                  variant="outline"
+                  size="lg"
+                  className="border-destructive text-destructive hover:bg-destructive/10"
+                  onClick={() => {
+                    setIsSearching(false);
+                    setLobbyTimer(30);
+                    setFoundPlayers([]);
+                  }}
+                >
+                  Отменить поиск
+                </Button>
               </div>
-              <Button 
-                variant="outline"
-                size="lg"
-                className="border-destructive text-destructive hover:bg-destructive/10"
-                onClick={() => {
-                  setIsSearching(false);
-                  setLobbyTimer(30);
-                }}
-              >
-                Отменить поиск
-              </Button>
             </div>
           )}
         </Card>
