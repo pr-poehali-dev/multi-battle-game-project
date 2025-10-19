@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Switch } from '@/components/ui/switch';
+import { Slider } from '@/components/ui/slider';
+import { Separator } from '@/components/ui/separator';
 import Icon from '@/components/ui/icon';
 
-type GameSection = 'menu' | 'profile' | 'leaderboard' | 'inventory' | 'shop';
+type GameSection = 'menu' | 'profile' | 'leaderboard' | 'inventory' | 'shop' | 'lobby' | 'achievements' | 'settings';
 
 const Index = () => {
   const [currentSection, setCurrentSection] = useState<GameSection>('menu');
@@ -46,6 +49,34 @@ const Index = () => {
     { id: 4, name: 'Набор Зелий', price: 350, image: '🧪', type: 'consumable' },
   ];
 
+  const achievements = [
+    { id: 1, name: 'Первая Кровь', description: 'Одержите первую победу', progress: 100, total: 100, icon: '⚔️', unlocked: true },
+    { id: 2, name: 'Воин', description: 'Одержите 100 побед', progress: 234, total: 100, icon: '🛡️', unlocked: true },
+    { id: 3, name: 'Легенда', description: 'Достигните рейтинга 2500', progress: 2847, total: 2500, icon: '👑', unlocked: true },
+    { id: 4, name: 'Коллекционер', description: 'Соберите 50 предметов', progress: 38, total: 50, icon: '📦', unlocked: false },
+    { id: 5, name: 'Богач', description: 'Накопите 50,000 монет', progress: 25420, total: 50000, icon: '💰', unlocked: false },
+    { id: 6, name: 'Непобедимый', description: 'Выиграйте 10 боев подряд', progress: 7, total: 10, icon: '🔥', unlocked: false },
+  ];
+
+  const [lobbyTimer, setLobbyTimer] = useState(30);
+  const [isSearching, setIsSearching] = useState(false);
+  const [selectedMode, setSelectedMode] = useState<'solo' | 'duo' | 'squad'>('solo');
+  const [settings, setSettings] = useState({
+    soundVolume: 80,
+    musicVolume: 60,
+    graphics: 'high' as 'low' | 'medium' | 'high' | 'ultra',
+    showFPS: true,
+    vibration: true,
+    notifications: true
+  });
+
+  useEffect(() => {
+    if (isSearching && lobbyTimer > 0) {
+      const timer = setTimeout(() => setLobbyTimer(lobbyTimer - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [isSearching, lobbyTimer]);
+
   const rarityColors = {
     legendary: 'from-yellow-500 to-orange-500',
     epic: 'from-purple-500 to-pink-500',
@@ -68,7 +99,7 @@ const Index = () => {
           <Button 
             size="lg" 
             className="h-16 text-xl font-bold bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-700 shadow-xl hover:shadow-2xl transition-all hover:scale-105 animate-scale-in"
-            onClick={() => setCurrentSection('profile')}
+            onClick={() => setCurrentSection('lobby')}
           >
             <Icon name="Play" className="mr-2" size={24} />
             ИГРАТЬ
@@ -105,6 +136,25 @@ const Index = () => {
               onClick={() => setCurrentSection('leaderboard')}
             >
               <Icon name="Trophy" size={20} />
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3 mt-4">
+            <Button 
+              variant="outline"
+              className="h-12 border-purple/50 hover:border-purple hover:bg-purple/10"
+              onClick={() => setCurrentSection('achievements')}
+            >
+              <Icon name="Award" className="mr-2" size={20} />
+              Достижения
+            </Button>
+            <Button 
+              variant="outline"
+              className="h-12 border-muted/50 hover:border-muted hover:bg-muted/10"
+              onClick={() => setCurrentSection('settings')}
+            >
+              <Icon name="Settings" className="mr-2" size={20} />
+              Настройки
             </Button>
           </div>
         </div>
@@ -323,6 +373,301 @@ const Index = () => {
     </div>
   );
 
+  const Lobby = () => (
+    <div className="min-h-screen p-6 space-y-6 animate-fade-in">
+      <Button 
+        variant="ghost" 
+        onClick={() => {
+          setIsSearching(false);
+          setLobbyTimer(30);
+          setCurrentSection('menu');
+        }}
+        className="mb-4"
+      >
+        <Icon name="ArrowLeft" className="mr-2" size={20} />
+        Назад
+      </Button>
+
+      <div className="text-center mb-8">
+        <h2 className="text-4xl font-bold mb-2">Лобби</h2>
+        <p className="text-muted-foreground">Выберите режим игры</p>
+      </div>
+
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card 
+            className={`p-6 cursor-pointer transition-all hover:scale-105 ${
+              selectedMode === 'solo' ? 'border-2 border-primary bg-primary/10' : 'border border-border'
+            }`}
+            onClick={() => setSelectedMode('solo')}
+          >
+            <div className="text-center">
+              <div className="text-5xl mb-3">👤</div>
+              <div className="font-bold text-xl mb-1">Соло</div>
+              <div className="text-sm text-muted-foreground">1 игрок</div>
+            </div>
+          </Card>
+
+          <Card 
+            className={`p-6 cursor-pointer transition-all hover:scale-105 ${
+              selectedMode === 'duo' ? 'border-2 border-primary bg-primary/10' : 'border border-border'
+            }`}
+            onClick={() => setSelectedMode('duo')}
+          >
+            <div className="text-center">
+              <div className="text-5xl mb-3">👥</div>
+              <div className="font-bold text-xl mb-1">Дуо</div>
+              <div className="text-sm text-muted-foreground">2 игрока</div>
+            </div>
+          </Card>
+
+          <Card 
+            className={`p-6 cursor-pointer transition-all hover:scale-105 ${
+              selectedMode === 'squad' ? 'border-2 border-primary bg-primary/10' : 'border border-border'
+            }`}
+            onClick={() => setSelectedMode('squad')}
+          >
+            <div className="text-center">
+              <div className="text-5xl mb-3">👨‍👩‍👧‍👦</div>
+              <div className="font-bold text-xl mb-1">Отряд</div>
+              <div className="text-sm text-muted-foreground">4 игрока</div>
+            </div>
+          </Card>
+        </div>
+
+        <Card className="p-8 border-2 border-primary/30">
+          {!isSearching ? (
+            <div className="text-center space-y-6">
+              <div className="text-6xl mb-4">🎮</div>
+              <h3 className="text-2xl font-bold">Готовы к бою?</h3>
+              <p className="text-muted-foreground">Режим: {selectedMode === 'solo' ? 'Соло' : selectedMode === 'duo' ? 'Дуо' : 'Отряд'}</p>
+              <Button 
+                size="lg"
+                className="h-14 text-lg w-full max-w-md bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-700"
+                onClick={() => {
+                  setIsSearching(true);
+                  setLobbyTimer(30);
+                }}
+              >
+                <Icon name="Search" className="mr-2" size={20} />
+                Найти игру
+              </Button>
+            </div>
+          ) : (
+            <div className="text-center space-y-6">
+              <div className="text-8xl mb-4 animate-pulse-glow">⏱️</div>
+              <h3 className="text-3xl font-bold">Поиск игры...</h3>
+              <div className="text-5xl font-black text-primary">{lobbyTimer}с</div>
+              <Progress value={((30 - lobbyTimer) / 30) * 100} className="h-4 max-w-md mx-auto" />
+              <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                <span>Игроков найдено: {Math.min(lobbyTimer * 3, 98)}/100</span>
+              </div>
+              <Button 
+                variant="outline"
+                size="lg"
+                className="border-destructive text-destructive hover:bg-destructive/10"
+                onClick={() => {
+                  setIsSearching(false);
+                  setLobbyTimer(30);
+                }}
+              >
+                Отменить поиск
+              </Button>
+            </div>
+          )}
+        </Card>
+      </div>
+    </div>
+  );
+
+  const Achievements = () => (
+    <div className="min-h-screen p-6 space-y-6 animate-fade-in">
+      <Button 
+        variant="ghost" 
+        onClick={() => setCurrentSection('menu')}
+        className="mb-4"
+      >
+        <Icon name="ArrowLeft" className="mr-2" size={20} />
+        Назад
+      </Button>
+
+      <div className="text-center mb-8">
+        <h2 className="text-4xl font-bold mb-2">Достижения</h2>
+        <p className="text-muted-foreground">Ваши успехи и прогресс</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto">
+        {achievements.map((achievement) => (
+          <Card 
+            key={achievement.id}
+            className={`p-6 transition-all ${
+              achievement.unlocked 
+                ? 'border-2 border-primary/50 bg-primary/5 hover:scale-102' 
+                : 'border border-border opacity-60 hover:opacity-100'
+            }`}
+          >
+            <div className="flex items-start gap-4">
+              <div className={`text-5xl ${
+                achievement.unlocked ? 'animate-float' : 'grayscale'
+              }`}>
+                {achievement.icon}
+              </div>
+              
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="font-bold text-lg">{achievement.name}</h3>
+                  {achievement.unlocked && (
+                    <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-black text-xs">
+                      ✓
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground mb-3">{achievement.description}</p>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Прогресс</span>
+                    <span className="font-bold">
+                      {Math.min(achievement.progress, achievement.total)} / {achievement.total}
+                    </span>
+                  </div>
+                  <Progress 
+                    value={(Math.min(achievement.progress, achievement.total) / achievement.total) * 100} 
+                    className="h-2" 
+                  />
+                </div>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+
+  const Settings = () => (
+    <div className="min-h-screen p-6 space-y-6 animate-fade-in">
+      <Button 
+        variant="ghost" 
+        onClick={() => setCurrentSection('menu')}
+        className="mb-4"
+      >
+        <Icon name="ArrowLeft" className="mr-2" size={20} />
+        Назад
+      </Button>
+
+      <div className="text-center mb-8">
+        <h2 className="text-4xl font-bold mb-2">Настройки</h2>
+        <p className="text-muted-foreground">Персонализируйте игру</p>
+      </div>
+
+      <div className="max-w-2xl mx-auto space-y-6">
+        <Card className="p-6 border-2 border-primary/20">
+          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <Icon name="Volume2" size={24} className="text-primary" />
+            Звук
+          </h3>
+          
+          <div className="space-y-6">
+            <div>
+              <div className="flex justify-between mb-2">
+                <label className="text-sm font-medium">Громкость звуков</label>
+                <span className="text-sm text-primary font-bold">{settings.soundVolume}%</span>
+              </div>
+              <Slider 
+                value={[settings.soundVolume]} 
+                onValueChange={([value]) => setSettings({...settings, soundVolume: value})}
+                max={100}
+                step={1}
+                className="w-full"
+              />
+            </div>
+
+            <div>
+              <div className="flex justify-between mb-2">
+                <label className="text-sm font-medium">Громкость музыки</label>
+                <span className="text-sm text-primary font-bold">{settings.musicVolume}%</span>
+              </div>
+              <Slider 
+                value={[settings.musicVolume]} 
+                onValueChange={([value]) => setSettings({...settings, musicVolume: value})}
+                max={100}
+                step={1}
+                className="w-full"
+              />
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-6 border-2 border-primary/20">
+          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <Icon name="Monitor" size={24} className="text-accent" />
+            Графика
+          </h3>
+          
+          <div className="grid grid-cols-4 gap-2">
+            {(['low', 'medium', 'high', 'ultra'] as const).map((quality) => (
+              <Button
+                key={quality}
+                variant={settings.graphics === quality ? 'default' : 'outline'}
+                onClick={() => setSettings({...settings, graphics: quality})}
+                className={settings.graphics === quality ? 'bg-primary' : ''}
+              >
+                {quality === 'low' ? 'Низко' : quality === 'medium' ? 'Средне' : quality === 'high' ? 'Высоко' : 'Ультра'}
+              </Button>
+            ))}
+          </div>
+        </Card>
+
+        <Card className="p-6 border-2 border-primary/20">
+          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <Icon name="Sliders" size={24} className="text-secondary" />
+            Интерфейс
+          </h3>
+          
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="font-medium">Показывать FPS</div>
+                <div className="text-sm text-muted-foreground">Отображение частоты кадров</div>
+              </div>
+              <Switch 
+                checked={settings.showFPS} 
+                onCheckedChange={(checked) => setSettings({...settings, showFPS: checked})}
+              />
+            </div>
+
+            <Separator />
+
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="font-medium">Вибрация</div>
+                <div className="text-sm text-muted-foreground">Тактильная обратная связь</div>
+              </div>
+              <Switch 
+                checked={settings.vibration} 
+                onCheckedChange={(checked) => setSettings({...settings, vibration: checked})}
+              />
+            </div>
+
+            <Separator />
+
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="font-medium">Уведомления</div>
+                <div className="text-sm text-muted-foreground">Push-уведомления об игре</div>
+              </div>
+              <Switch 
+                checked={settings.notifications} 
+                onCheckedChange={(checked) => setSettings({...settings, notifications: checked})}
+              />
+            </div>
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-background">
       {currentSection === 'menu' && <MainMenu />}
@@ -330,6 +675,9 @@ const Index = () => {
       {currentSection === 'leaderboard' && <Leaderboard />}
       {currentSection === 'inventory' && <Inventory />}
       {currentSection === 'shop' && <Shop />}
+      {currentSection === 'lobby' && <Lobby />}
+      {currentSection === 'achievements' && <Achievements />}
+      {currentSection === 'settings' && <Settings />}
     </div>
   );
 };
