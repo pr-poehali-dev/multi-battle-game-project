@@ -58,9 +58,40 @@ const Index = () => {
     { id: 6, name: 'Непобедимый', description: 'Выиграйте 10 боев подряд', progress: 7, total: 10, icon: '🔥', unlocked: false },
   ];
 
+  const maps = [
+    { 
+      id: 1, 
+      name: 'Парящие Острова', 
+      description: 'Магические острова в небесах',
+      image: 'https://cdn.poehali.dev/projects/559a1f74-c645-493c-a5d5-6a16e5024e2e/files/235a5fac-c858-44af-b756-fa8577fe3968.jpg',
+      players: '100',
+      difficulty: 'medium',
+      icon: '🏝️'
+    },
+    { 
+      id: 2, 
+      name: 'Пустыня Руин', 
+      description: 'Древние развалины в песках',
+      image: 'https://cdn.poehali.dev/projects/559a1f74-c645-493c-a5d5-6a16e5024e2e/files/cbedaebc-9b09-4962-b8a1-b356609c8d4a.jpg',
+      players: '100',
+      difficulty: 'hard',
+      icon: '🏜️'
+    },
+    { 
+      id: 3, 
+      name: 'Ледяная Крепость', 
+      description: 'Замерзшие горы и пещеры',
+      image: 'https://cdn.poehali.dev/projects/559a1f74-c645-493c-a5d5-6a16e5024e2e/files/6efa0dd9-38bf-496c-bbb4-3e3815983b36.jpg',
+      players: '100',
+      difficulty: 'easy',
+      icon: '❄️'
+    },
+  ];
+
   const [lobbyTimer, setLobbyTimer] = useState(30);
   const [isSearching, setIsSearching] = useState(false);
   const [selectedMode, setSelectedMode] = useState<'solo' | 'duo' | 'squad'>('solo');
+  const [selectedMap, setSelectedMap] = useState(1);
   const [settings, setSettings] = useState({
     soundVolume: 80,
     musicVolume: 60,
@@ -393,46 +424,97 @@ const Index = () => {
         <p className="text-muted-foreground">Выберите режим игры</p>
       </div>
 
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card 
-            className={`p-6 cursor-pointer transition-all hover:scale-105 ${
-              selectedMode === 'solo' ? 'border-2 border-primary bg-primary/10' : 'border border-border'
-            }`}
-            onClick={() => setSelectedMode('solo')}
-          >
-            <div className="text-center">
-              <div className="text-5xl mb-3">👤</div>
-              <div className="font-bold text-xl mb-1">Соло</div>
-              <div className="text-sm text-muted-foreground">1 игрок</div>
-            </div>
-          </Card>
+      <div className="max-w-6xl mx-auto space-y-6">
+        <div>
+          <h3 className="text-2xl font-bold mb-4 text-center">Выберите режим</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card 
+              className={`p-6 cursor-pointer transition-all hover:scale-105 ${
+                selectedMode === 'solo' ? 'border-2 border-primary bg-primary/10' : 'border border-border'
+              }`}
+              onClick={() => setSelectedMode('solo')}
+            >
+              <div className="text-center">
+                <div className="text-5xl mb-3">👤</div>
+                <div className="font-bold text-xl mb-1">Соло</div>
+                <div className="text-sm text-muted-foreground">1 игрок</div>
+              </div>
+            </Card>
 
-          <Card 
-            className={`p-6 cursor-pointer transition-all hover:scale-105 ${
-              selectedMode === 'duo' ? 'border-2 border-primary bg-primary/10' : 'border border-border'
-            }`}
-            onClick={() => setSelectedMode('duo')}
-          >
-            <div className="text-center">
-              <div className="text-5xl mb-3">👥</div>
-              <div className="font-bold text-xl mb-1">Дуо</div>
-              <div className="text-sm text-muted-foreground">2 игрока</div>
-            </div>
-          </Card>
+            <Card 
+              className={`p-6 cursor-pointer transition-all hover:scale-105 ${
+                selectedMode === 'duo' ? 'border-2 border-primary bg-primary/10' : 'border border-border'
+              }`}
+              onClick={() => setSelectedMode('duo')}
+            >
+              <div className="text-center">
+                <div className="text-5xl mb-3">👥</div>
+                <div className="font-bold text-xl mb-1">Дуо</div>
+                <div className="text-sm text-muted-foreground">2 игрока</div>
+              </div>
+            </Card>
 
-          <Card 
-            className={`p-6 cursor-pointer transition-all hover:scale-105 ${
-              selectedMode === 'squad' ? 'border-2 border-primary bg-primary/10' : 'border border-border'
-            }`}
-            onClick={() => setSelectedMode('squad')}
-          >
-            <div className="text-center">
-              <div className="text-5xl mb-3">👨‍👩‍👧‍👦</div>
-              <div className="font-bold text-xl mb-1">Отряд</div>
-              <div className="text-sm text-muted-foreground">4 игрока</div>
-            </div>
-          </Card>
+            <Card 
+              className={`p-6 cursor-pointer transition-all hover:scale-105 ${
+                selectedMode === 'squad' ? 'border-2 border-primary bg-primary/10' : 'border border-border'
+              }`}
+              onClick={() => setSelectedMode('squad')}
+            >
+              <div className="text-center">
+                <div className="text-5xl mb-3">👨‍👩‍👧‍👦</div>
+                <div className="font-bold text-xl mb-1">Отряд</div>
+                <div className="text-sm text-muted-foreground">4 игрока</div>
+              </div>
+            </Card>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-2xl font-bold mb-4 text-center">Выберите карту</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {maps.map((map) => (
+              <Card 
+                key={map.id}
+                className={`cursor-pointer transition-all hover:scale-105 overflow-hidden ${
+                  selectedMap === map.id ? 'border-2 border-primary bg-primary/5' : 'border border-border'
+                }`}
+                onClick={() => setSelectedMap(map.id)}
+              >
+                <div className="relative h-40 overflow-hidden">
+                  <img 
+                    src={map.image} 
+                    alt={map.name}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                  <div className="absolute bottom-2 left-2 right-2">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-2xl">{map.icon}</span>
+                      <span className="font-bold text-white text-lg">{map.name}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4">
+                  <p className="text-sm text-muted-foreground mb-3">{map.description}</p>
+                  <div className="flex items-center justify-between text-xs">
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      <Icon name="Users" size={12} />
+                      {map.players}
+                    </Badge>
+                    <Badge 
+                      className={
+                        map.difficulty === 'easy' ? 'bg-green-600' :
+                        map.difficulty === 'medium' ? 'bg-yellow-600' :
+                        'bg-red-600'
+                      }
+                    >
+                      {map.difficulty === 'easy' ? 'Легко' : map.difficulty === 'medium' ? 'Средне' : 'Сложно'}
+                    </Badge>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
         </div>
 
         <Card className="p-8 border-2 border-primary/30">
@@ -440,7 +522,16 @@ const Index = () => {
             <div className="text-center space-y-6">
               <div className="text-6xl mb-4">🎮</div>
               <h3 className="text-2xl font-bold">Готовы к бою?</h3>
-              <p className="text-muted-foreground">Режим: {selectedMode === 'solo' ? 'Соло' : selectedMode === 'duo' ? 'Дуо' : 'Отряд'}</p>
+              <div className="flex items-center justify-center gap-4 text-muted-foreground mb-4">
+                <div className="flex items-center gap-2">
+                  <Icon name="Users" size={20} />
+                  <span>Режим: {selectedMode === 'solo' ? 'Соло' : selectedMode === 'duo' ? 'Дуо' : 'Отряд'}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Icon name="Map" size={20} />
+                  <span>Карта: {maps.find(m => m.id === selectedMap)?.name}</span>
+                </div>
+              </div>
               <Button 
                 size="lg"
                 className="h-14 text-lg w-full max-w-md bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-700"
@@ -462,6 +553,16 @@ const Index = () => {
               <div className="flex items-center justify-center gap-2 text-muted-foreground">
                 <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
                 <span>Игроков найдено: {Math.min(lobbyTimer * 3, 98)}/100</span>
+              </div>
+              <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground mb-4">
+                <span className="flex items-center gap-1">
+                  <Icon name="Users" size={16} />
+                  {selectedMode === 'solo' ? 'Соло' : selectedMode === 'duo' ? 'Дуо' : 'Отряд'}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Icon name="Map" size={16} />
+                  {maps.find(m => m.id === selectedMap)?.icon} {maps.find(m => m.id === selectedMap)?.name}
+                </span>
               </div>
               <Button 
                 variant="outline"
